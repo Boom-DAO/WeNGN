@@ -1,5 +1,5 @@
 name: forge
-
+on: [push]
 env:
   FOUNDRY_PROFILE: ci
 
