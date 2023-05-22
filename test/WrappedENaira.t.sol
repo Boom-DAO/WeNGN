@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/WrappedENaira.sol";
+import {WrappedENaira} from "../src/WrappedENaira.sol";
 
 contract WrappedTest is Test {
     WrappedENaira public wrapped;
@@ -12,7 +12,7 @@ contract WrappedTest is Test {
     function setUp() public {
         wrapped = new WrappedENaira();
         deployer = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
-        initialAmount = 1000 * 10 ** wrapped.decimals();
+        initialAmount = 1300000000000 * 10 ** wrapped.decimals(); // 1.3 trillion (1 300 000 000 000)
     }
 
     function testName() public {
@@ -29,11 +29,7 @@ contract WrappedTest is Test {
 
     function testInitialSupply() public {
         assertEq(wrapped.totalSupply(), initialAmount);
-    }
-
-    function testBalanceMinter() public {
-        assertEq(initialAmount, wrapped.balanceOf(deployer));
-        assertEq(wrapped.totalSupply(), wrapped.balanceOf(deployer));
+        assertEq(wrapped.balanceOf(deployer), initialAmount);
     }
 
     function testMint() public {
@@ -44,11 +40,13 @@ contract WrappedTest is Test {
         assertEq(wrapped.balanceOf(deployer), newValue);
     }
     
-    function test_When_MinterIsNotOwner() public {
+    function testMint_NotOwner() public {
         uint256 value = 100 * 10 ** wrapped.decimals();
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(address(0));
         wrapped.mint(deployer, value);
+        assertEq(wrapped.totalSupply(), initialAmount);
+        assertEq(wrapped.balanceOf(deployer), initialAmount);
     }
     
     function testBurn() public {
@@ -56,5 +54,12 @@ contract WrappedTest is Test {
         uint256 newValue = initialAmount - value;
         wrapped.burn(value);
         assertEq(wrapped.totalSupply(), newValue);
+        assertEq(wrapped.balanceOf(deployer), newValue);
+    }
+
+    function testBurn_MoreThanSupply() public {
+        uint256 value = initialAmount + 1;
+        vm.expectRevert("ERC20: burn amount exceeds balance");
+        wrapped.burn(value);
     }
 }
