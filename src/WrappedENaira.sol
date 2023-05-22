@@ -12,8 +12,8 @@ import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 /// @custom:security-contact bsirt@boom.market
 contract WrappedENaira is ERC20, ERC20Burnable, Ownable {
     uint256 public initialAmount = 1300000000000; // 1.3 trillion (1 300 000 000 000)
-    string public tokenName = "WrappedENaira";
-    string public tokenSymbol = "WENGN";
+    string public tokenName = "Wrapped eNaira";
+    string public tokenSymbol = "WeNGN";
 
     constructor() ERC20(tokenName, tokenSymbol) {
         _mint(msg.sender, initialAmount * 10 ** decimals());

@@ -16,11 +16,11 @@ contract WrappedTest is Test {
     }
 
     function testName() public {
-        assertEq(wrapped.name(), "WrappedENaira");
+        assertEq(wrapped.name(), "Wrapped eNaira");
     }
 
     function testSymbol() public {
-        assertEq(wrapped.symbol(), "WENGN");
+        assertEq(wrapped.symbol(), "WeNGN");
     }
 
     function testDecimals() public {
