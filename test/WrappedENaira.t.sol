@@ -4,9 +4,9 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import {WrappedENaira} from "../src/WrappedENaira.sol";
 import {UUPSProxy} from "../src/UUPSProxy.sol";
+import {WrappedENairaV2mock} from "./WrappedENairaV2mock.sol";
 
 contract WrappedTest is Test {
-    WrappedENaira wrapped;
     UUPSProxy proxy;
     address deployer;
     uint256 initialAmount;
@@ -14,11 +14,12 @@ contract WrappedTest is Test {
     uint256 val;
 
     function setUp() public {
-        wrapped = new WrappedENaira();
+        WrappedENaira wrapped = new WrappedENaira();
         // deploy proxy contract and point it to implementation
         proxy = new UUPSProxy(address(wrapped), "");
         // initialize implementation contract
-        address(proxy).call(abi.encodeWithSignature("initialize()"));        
+        (bool b, ) = address(proxy).call(abi.encodeWithSignature("initialize()"));        
+        assertTrue(b);
         deployer = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
         (, bytes memory returnedData) = address(proxy).call(
             abi.encodeWithSignature("decimals()")
@@ -63,7 +64,8 @@ contract WrappedTest is Test {
 
     function testMint() public {
         uint256 newValue = initialAmount + 100 * 10 ** dec;
-        address(proxy).call(abi.encodeWithSignature("mint(address,uint256)", deployer, val));
+        (bool a, ) = address(proxy).call(abi.encodeWithSignature("mint(address,uint256)", deployer, val));
+        assertTrue(a);
         (, bytes memory returnedData) = address(proxy).call(
             abi.encodeWithSignature("totalSupply()")
         );
@@ -79,8 +81,9 @@ contract WrappedTest is Test {
     function testMint_NotOwner() public {
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(address(0));
-        address(proxy).call(abi.encodeWithSignature("mint(address,uint256)", deployer, val));        
-         (, bytes memory returnedData) = address(proxy).call(
+        (bool a,) = address(proxy).call(abi.encodeWithSignature("mint(address,uint256)", deployer, val));        
+        assertTrue(a);
+        (, bytes memory returnedData) = address(proxy).call(
             abi.encodeWithSignature("totalSupply()")
         );
         uint256 t = abi.decode(returnedData, (uint256));
@@ -94,8 +97,9 @@ contract WrappedTest is Test {
 
     function testBurn() public {
         uint256 newValue = initialAmount - 100 * 10 ** dec;
-        address(proxy).call(abi.encodeWithSignature("burn(uint256)", val));        
-         (, bytes memory returnedData) = address(proxy).call(
+        (bool a,) = address(proxy).call(abi.encodeWithSignature("burn(uint256)", val));        
+        assertTrue(a);
+        (, bytes memory returnedData) = address(proxy).call(
             abi.encodeWithSignature("totalSupply()")
         );
         uint256 t = abi.decode(returnedData, (uint256));
@@ -110,6 +114,21 @@ contract WrappedTest is Test {
     function testBurn_MoreThanSupply() public {
         uint256 value = initialAmount + 1;
         vm.expectRevert("ERC20: burn amount exceeds balance");
-        address(proxy).call(abi.encodeWithSignature("burn(uint256)", value));        
+        (bool a, ) = address(proxy).call(abi.encodeWithSignature("burn(uint256)", value));        
+        assertTrue(a);
+    }
+
+    function testUpdate() public {
+        WrappedENairaV2mock wrapped2 = new WrappedENairaV2mock();
+        (bool a,) = address(proxy).call(
+            abi.encodeWithSignature("upgradeTo(address)", address(wrapped2))
+        );
+        assertTrue(a);
+        (, bytes memory returnedData) = address(proxy).call(abi.encodeWithSignature("symbol()"));        
+        string memory m = abi.decode(returnedData, (string));
+        assertEq(m, "WeNGN");
+        (, bytes memory returnedData2) = address(proxy).call(abi.encodeWithSignature("mockfn()"));        
+        string memory m2 = abi.decode(returnedData2, (string));
+        assertEq(m2, "mock");
     }
 }
