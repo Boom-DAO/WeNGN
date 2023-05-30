@@ -1,26 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-import {WrappedENaira} from "../src/WrappedENaira.sol";
+import {Wrapped__TOKEN_NAME__} from "../src/Wrapped__TOKEN_NAME__.sol";
 
 contract WrappedTest is Test {
-    WrappedENaira public wrapped;
+    Wrapped__TOKEN_NAME__ public wrapped;
     address public deployer;
     uint256 public initialAmount;
 
     function setUp() public {
-        wrapped = new WrappedENaira();
+        wrapped = new Wrapped__TOKEN_NAME__();
         deployer = 0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496;
-        initialAmount = 1300000000000 * 10 ** wrapped.decimals(); // 1.3 trillion (1 300 000 000 000)
+        initialAmount = __INITIAL_AMOUNT__ * 10 ** wrapped.decimals();
     }
 
     function testName() public {
-        assertEq(wrapped.name(), "Wrapped eNaira");
+        assertEq(wrapped.name(), __TOKEN_NAME__);
     }
 
     function testSymbol() public {
-        assertEq(wrapped.symbol(), "WeNGN");
+        assertEq(wrapped.symbol(), __TOKEN_SYMBOL__);
     }
 
     function testDecimals() public {
@@ -40,7 +40,7 @@ contract WrappedTest is Test {
         assertEq(wrapped.balanceOf(deployer), newValue);
     }
     
-    function testMint_NotOwner() public {
+    function testMintNotOwner() public {
         uint256 value = 100 * 10 ** wrapped.decimals();
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(address(0));
@@ -57,7 +57,7 @@ contract WrappedTest is Test {
         assertEq(wrapped.balanceOf(deployer), newValue);
     }
 
-    function testBurn_MoreThanSupply() public {
+    function testBurnMoreThanSupply() public {
         uint256 value = initialAmount + 1;
         vm.expectRevert("ERC20: burn amount exceeds balance");
         wrapped.burn(value);
