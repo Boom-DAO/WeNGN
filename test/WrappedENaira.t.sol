@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.19;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {WrappedENaira} from "../src/WrappedENaira.sol";
 
 contract WrappedTest is Test {
@@ -40,7 +40,7 @@ contract WrappedTest is Test {
         assertEq(wrapped.balanceOf(deployer), newValue);
     }
     
-    function testMint_NotOwner() public {
+    function testMintNotOwner() public {
         uint256 value = 100 * 10 ** wrapped.decimals();
         vm.expectRevert("Ownable: caller is not the owner");
         vm.prank(address(0));
@@ -57,7 +57,7 @@ contract WrappedTest is Test {
         assertEq(wrapped.balanceOf(deployer), newValue);
     }
 
-    function testBurn_MoreThanSupply() public {
+    function testBurnMoreThanSupply() public {
         uint256 value = initialAmount + 1;
         vm.expectRevert("ERC20: burn amount exceeds balance");
         wrapped.burn(value);

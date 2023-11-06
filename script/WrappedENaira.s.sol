@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.19;
 
-import "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
 import {WrappedENaira} from "../src/WrappedENaira.sol";
 
 contract WrappedENairaScript is Script {
@@ -10,7 +10,7 @@ contract WrappedENairaScript is Script {
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
-        WrappedENaira wrapped = new WrappedENaira();
+        new WrappedENaira();
         vm.stopBroadcast();
     }
 }
